@@ -81,6 +81,26 @@ done
 # Note: Andean condor had intervals with too few recombinations, ended up using -p "4+20*2+6"
 
 
+### Bootstrap
+
+PSMCDIR=~/project/programs/psmc/
+REPORTDIR=~/project/reports/condor/psmc
+mkdir -p ${REPORTDIR}
+cd ~/myscratch/condor/psmc
+for i in B*subset.psmcfa C*subset.psmcfa ; do
+${PSMCDIR}/utils/splitfa ${i} > ${i%.psmcfa}_split.psmcfa
+qsub -N psmcboot -t 1-100 -V -cwd -l h_rt=24:00:00,mem_free=4G -e ${REPORTDIR} -o ${REPORTDIR} <<EOF
+${PSMCDIR}/psmc -b -N25 -t15 -r5 -p "4+25*2+4+6" -o ${i%.psmcfa}_boot\${SGE_TASK_ID}.out.psmc ${i%.psmcfa}_split.psmcfa
+EOF
+done
+for i in V*subset.psmcfa ; do
+${PSMCDIR}/utils/splitfa ${i} > ${i%.psmcfa}_split.psmcfa
+qsub -N psmcboot -t 1-100 -V -cwd -l h_rt=24:00:00,mem_free=4G -e ${REPORTDIR} -o ${REPORTDIR} <<EOF
+${PSMCDIR}/psmc -b -N25 -t15 -r5 -p "4+20*2+6" -o ${i%.psmcfa}_boot\${SGE_TASK_ID}.out.psmc ${i%.psmcfa}_split.psmcfa
+EOF
+done
+
+
 ### PSMC with high, low diversity regions of condor (distal and proximal regions)
 
 SIZES=gc_PacBio_HiC.sizes
