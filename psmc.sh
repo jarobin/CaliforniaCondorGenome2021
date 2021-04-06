@@ -94,17 +94,21 @@ cat CYW1141_simple_PASS_nomissing_subset.out.psmc CYW1141_*_boot* > CYW1141_simp
 cat VulGry1_simple_PASS_nomissing_subset.out8.psmc VulGry1_*_boot* > VulGry1_simple_PASS_nomissing_subset_split_boot.combined.out.psmc
 
 
-### Generate plot files with mu=1.4e-8, g=10
-# Use -R to keep the files generated during the plotting - the .plot.*.txt files contain the rescaled coordinates
-
-MU=1.4e-8
-G=10
+### Generate plot files
+# Use -R to keep the files generated during plotting - the .plot.*.txt files contain the rescaled coordinates
+# M is the per-year mutation rate, MU is the per-generation mutation rate
+# Main results use the mutation rate of 1.4e-8 per generation and generation time of 10 years
 
 PSMCDIR=~/project/programs/psmc/
-for INPUT in *combined.out.psmc ; do
-PLOT=${INPUT}_mu${MU}_g${G}.plot
+
+for M in 1.4e-9 0.65e-9 ; do
+for G in 5 10 15 ; do
+MU=$(echo ${M} | awk -v var=${G} '{print $0*var}')
+mkdir plot_mu${MU}_g${G}
+for INPUT in *subset.out*.psmc ; do
+PLOT=plot_mu${MU}_g${G}/${INPUT}_mu${MU}_g${G}.plot
 perl ${PSMCDIR}/utils/psmc_plot.pl -R -p -u ${MU} -g ${G} ${PLOT} ${INPUT}
-done
+done ; done ; done
 
 
 ### PSMC with high, low diversity regions of condor (distal and proximal regions)
@@ -360,4 +364,133 @@ psmc_plot_fill()
 
 close.screen(all = TRUE)
 dev.off()
+
+
+### Plots with varying mu, g (in R)
+
+# Turkey vulture color
+c1=c(0, 192, 0)/255
+# CA condor 1 color
+c2=c(171, 0, 0)/255
+# CA condor 2 color
+c3=c(240, 105, 20)/255
+# Andean condor color
+c4=c(0, 128, 255)/255
+
+mycols=c(
+rgb(c1[1], c1[2], c1[3], alpha=1),
+rgb(c2[1], c2[2], c2[3], alpha=1),
+rgb(c3[1], c3[2], c3[3], alpha=1),
+rgb(c4[1], c4[2], c4[3], alpha=1)
+)
+
+psmc_base_plot=function(){
+	par(mar=c(5,4,1.5,1))
+	plot(1, 1, type="n", log="x", axes=F, xlim=c(xmin, xmax), ylim=c(ymin, ymax), xlab="", ylab="")	
+	axis(side=2)	
+	at.x=outer(1:9, 10^(3:8))
+	lab.x=NULL
+	for (i in 1:length(at.x)){
+		p=log10(at.x[i])
+		if (p %% 1 == 0) {lab.x[i]=as.expression(bquote(10^ .(p)))}
+		else {lab.x[i]=""}
+	}
+	axis(1, at=at.x, labels=lab.x, las=1)		
+	if(labx){title(xlab="Years before present", line=3.75)}
+	title(xlab=myxlab_sub, line=2.5)
+	if(laby){title(ylab=expression("Effective population size (x10"^4*")"), line=2.5)}
+	box()
+}
+
+psmc_plot_fill=function(){
+	allfiles=list.files(pattern="txt")
+	samplename="BGI_N323"
+	nn=1
+	dfiles=allfiles[grep(pattern=samplename, allfiles)]
+	aa=read.table(dfiles[1])
+	lines(aa$V1, aa$V2, type="s", col=mycols[nn])
+	samplename="CYW1141"
+	nn=2
+	dfiles=allfiles[grep(pattern=samplename, allfiles)]
+	aa=read.table(dfiles[1])
+	lines(aa$V1, aa$V2, type="s", col=mycols[nn])
+	samplename="CRW1112"
+	nn=3
+	dfiles=allfiles[grep(pattern=samplename, allfiles)]
+	aa=read.table(dfiles[1])
+	lines(aa$V1, aa$V2, type="s", col=mycols[nn])
+	samplename="VulGry1"
+	nn=4
+	dfiles=allfiles[grep(pattern=samplename, allfiles)]
+	aa=read.table(dfiles[1])
+	lines(aa$V1, aa$V2, type="s", col=mycols[nn])
+}
+
+setwd("~/condor/analysis/psmc/variable_g/")
+pdf("psmc_6panel_variable_mu_g.pdf", width=6, height=5, pointsize=8)
+par(mfrow=c(3,2))
+
+xmin=1e3
+xmax=1e7
+ymin=0
+
+setwd("~/condor/analysis/psmc/variable_g/")
+setwd("plot_mu3.25e-09_g5")
+myxlab_sub=expression(paste(mu, "=3.25x10"^-9, "/generation"))
+ymax=25
+labx=F
+laby=T
+psmc_base_plot()
+psmc_plot_fill()
+title(main=expression(paste("M=6.5x10"^-10, "/year")), font=1)
+legend("topleft", col=mycols[c(2, 3, 4, 1)], legend=c("CA condor 1", "CA condor 2", "Andean condor", "Turkey vulture"), bty="n")
+
+setwd("~/condor/analysis/psmc/variable_g/")
+setwd("plot_mu7e-09_g5")
+myxlab_sub=expression(paste(mu, "=7.0x10"^-9, "/generation"))
+ymax=25
+labx=F
+laby=F
+psmc_base_plot()
+psmc_plot_fill()
+title(main=expression(paste("M=1.4x10"^-9, "/year")), font=1)
+
+setwd("~/condor/analysis/psmc/variable_g/")
+setwd("plot_mu6.5e-09_g10")
+myxlab_sub=expression(paste(mu, "=6.5x10"^-9, "/generation"))
+ymax=12
+labx=F
+laby=T
+psmc_base_plot()
+psmc_plot_fill()
+
+setwd("~/condor/analysis/psmc/variable_g/")
+setwd("plot_mu1.4e-08_g10")
+myxlab_sub=expression(paste(mu, "=1.4x10"^-8, "/generation"))
+ymax=12
+labx=F
+laby=F
+psmc_base_plot()
+psmc_plot_fill()
+
+setwd("~/condor/analysis/psmc/variable_g/")
+setwd("plot_mu9.75e-09_g15")
+myxlab_sub=expression(paste(mu, "=9.75x10"^-9, "/generation"))
+ymax=8
+labx=T
+laby=T
+psmc_base_plot()
+psmc_plot_fill()
+
+setwd("~/condor/analysis/psmc/variable_g/")
+setwd("plot_mu2.1e-08_g15")
+myxlab_sub=expression(paste(mu, "=2.1x10"^-8, "/generation"))
+ymax=8
+labx=T
+laby=F
+psmc_base_plot()
+psmc_plot_fill()
+
+dev.off()
+
 
