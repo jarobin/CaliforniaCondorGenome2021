@@ -74,7 +74,7 @@ LOG=CYW1141_ismc.map.log
 /usr/bin/time -v  ${ISMC_DIR}/ismc_mapper params=${PAR} |& tee ${LOG}
 
 
-### Rename chromosomes in iSMC output
+### Rename chromosomes in iSMC output (iSMC gives sequential numeric chromosome names)
 
 for DATA in CYW1141_ismc.rho.*.bedgraph ; do 
 grep -v "^chrom" ${DATA} | sed 's/^chr//g' \
@@ -83,9 +83,10 @@ sort -k1,1 -k2,2n ${DATA}_scaffnames.bed > ${DATA}_scaffnames_sorted.bed
 done
 
 
+################################################################################
 ### Plot in R
 
-# A: Recombination rate across the genome
+### Recombination rate across the genome
 
 # Read in data and rename chromosomes
 df=read.table("CYW1141_ismc.rho.1Mb.bedgraph_scaffnames_sorted.bed", header=F)
@@ -114,20 +115,21 @@ colset=c(rgb(c1[1], c1[2], c1[3], alpha=1), rgb(c2[1], c2[2], c2[3], alpha=1))
 
 # Define chromosome label vector
 mylabels=as.character(unique(temp$chromosome))
-mylabels[c(15,17,19,21,22,23,24,25,26,27,28)]=""
+mylabels[c(15,17,19,21,22,23,25,26,27,28)]=""
 
 # Plot (using no internal padding with xaxs="i" but then adding some padding (10) manually on either side of data)
+ymin=0
+ymax=2.25
+
 par(mar=c(3,4,1.5,0.5))
-plot(0, 0, type="n", xlim=c(0, nrow(temp)+20), ylim=c(0, 2.25), xlab="", ylab="", frame.plot=F, axes=F, xaxs="i")
+plot(0, 0, type="n", xlim=c(0, nrow(temp)+20), ylim=c(ymin, ymax), xlab="", ylab="", frame.plot=F, axes=F, xaxs="i")
 title(ylab=expression(paste(rho, "/bp x 10"^-3, sep="")), line=2.5)
 axis(side=2)
 axis(side=1, at=pos+10, labels=F)
-par(xpd=T)
 axis(side=1, at=numpos+10, tick=F, labels=mylabels, las=3, line=-.25, cex.axis=1)
-par(xpd=F)
 title(xlab="Chromosome", line=1.75)
 # Add gray stripes to background
-for (i in seq(0, 2.25, by=1)){rect(-1000, i, nrow(temp)+1000, i+.5, col=bgcol, border=NA)}
+for (i in seq(ymin, ymax, by=1)){rect(-1000, i, nrow(temp)+1000, i+.5, col=bgcol, border=NA)}
 
 # Add chromosome lines
 chrs=as.numeric(unique(temp$chromosome))
@@ -144,7 +146,9 @@ for (i in 1:length(chrs)){
 box()
 
 
-# B: Boxplot of recombination rate in distal versus proximal regions
+################################################################################
+### Boxplot of recombination rate in distal versus proximal regions
+# Note: Uses same input data as above (recombination rate across the genome)
 
 # Significance symbols to add to plot
 starfn=function(pval){
