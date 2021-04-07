@@ -38,12 +38,38 @@ OUT=CYW1141_ismc.rho.1kb.bedgraph_sorted_distToNearestCgi.bed
 bedtools closest -d -t first -a ${IN} -b ${CGI} > ${OUT}
 
 
+### Get het. data for same window coordinates as in iSMC for correlogram
+
+# Get coordinates of iSMC 1 Mb windows
+BED=CYW1141_ismc.rho.1Mb.bedgraph_scaffnames_sorted.bed
+awk '{printf "%s\t%s\t%s\n", $1, $2, $3-1}' ${BED} > condor_ismc_coords_1Mb.list
+
+# Get numbers of hets, calls in coordinates from list
+SCRIPT=WindowHetCoords.py
+for NAME in BGI_N323 CRW1112 CYW1141 VulGry1 ; do
+for i in {1..32} ; do
+VCF=${NAME}*_$(printf %03d ${i})_*_Filter.vcf.gz
+awk -v var=HiC_scaffold_${i} '$1==var' condor_ismc_coords_1Mb.list > tempcoords_${NAME}_${i}
+OUT=${VCF%.vcf.gz}_het_ismc_coords_1Mb.txt
+python ${SCRIPT} ${VCF} tempcoords_${NAME}_${i} ${OUT}
+rm tempcoords_${NAME}_${i}
+done & done
+
+# Concatenate to make final file (note: scaffolds renamed because iSMC assigns chromosome names sequentially)
+for NAME in BGI_N323 CRW1112 CYW1141 VulGry1 ; do
+echo -e "chrom\twindow_start\tsites_total\thet_${NAME}" > ${NAME}_het_ismc_coords_1Mb.txt
+for i in {001..032} ; do
+tail -n +2 ${NAME}*_${i}_*_het_ismc_coords_1Mb.txt \
+| awk '{if ($4 > 0) {printf "%s\t%s\t%s\t%s\n", $1, $2, $3, $5/$4} else {printf "%s\t%s\t%s\t%s\n", $1, $2, $3, "NA"}}' >> ${NAME}_het_ismc_coords_1Mb.txt
+done ; done
+
+
 ################################################################################
 ### Plotting in R
 
 ### Plot GC content across the genome
 
-# Read in data and rename chromosomes
+# Read in data files and rename chromosomes (from scaffold to proper chromosome names, also exclude chrZ)
 df=read.table("gc_PacBio_HiC_CYW1141_ismc.rho.1Mb_GC.txt", header=T)
 chrkey=read.table("condor_chr_scaff_length.txt", header=T, sep="\t", stringsAsFactors=F)
 df=df[which(df$chromosome %in% chrkey$SCAFF),]
@@ -241,3 +267,116 @@ polygon(ribbon_xs, scale*ribbon_ys, col=ribbon_col, border=NA)
 
 # Add the line for the actual mean rho per distance bin
 lines(1:length(mean_rho_per_dist_bin), scale*mean_rho_per_dist_bin, lwd=2)
+
+
+################################################################################
+### Correlogram (adapted from https://stackoverflow.com/questions/19012529/correlation-corrplot-configuration)
+
+library(corrgram)
+
+# Pearson correlations
+panel.shadeNtext <- function (x, y, corr = NULL, col.regions, ...) 
+{
+  corr <- cor(x, y, use = "pair")
+  results <- cor.test(x, y, alternative = "two.sided")
+  est <- results$p.value
+  stars <- ifelse(est < 0.001, "***", 
+                  ifelse(est < 0.01, "**", 
+                         ifelse(est < 0.05, "*", "")))
+  ncol <- 14
+  pal <- col.regions(ncol)
+  col.ind <- as.numeric(cut(corr, breaks = seq(from = -1, to = 1, 
+                                               length = ncol + 1), include.lowest = TRUE))
+  usr <- par("usr")
+  rect(usr[1], usr[3], usr[2], usr[4], col = pal[col.ind], 
+       border = NA)
+  #box(col = "lightgray")
+  box(col = NULL, lwd=.5)
+  on.exit(par(usr))
+  par(usr = c(0, 1, 0, 1))
+  r <- formatC(corr, digits = 2, format = "f")
+  cex.cor <- .6/strwidth("-X.xx")
+  fonts <- ifelse(stars != "", 2,1)
+  # option 1: stars:
+  text(0.5, 0.4, paste0(r,"\n", stars), cex = cex.cor)
+  # option 2: bolding:
+  #text(0.5, 0.5, r, cex = cex.cor, font=fonts)
+}
+
+# Read in data files and rename chromosomes (from scaffold to proper chromosome names, also exclude chrZ)
+aa=read.table("gc_PacBio_HiC_CYW1141_ismc_20200720_a.rho.1Mb_GC.txt", header=T, sep='\t')
+aa=aa[with(aa, order(aa$chromosome, as.numeric(aa$start))),]
+
+hetfiles=list.files(pattern="_het_ismc_coords_1Mb.txt")
+chrkey=read.table("condor_chr_scaff_length.txt", header=T, sep="\t", stringsAsFactors=F)
+df=aa
+for (i in 1:length(hetfiles)){
+	bb=read.table(hetfiles[i], header=T, sep="\t")
+	bb=bb[with(bb, order(bb$chrom, as.numeric(bb$window_start))),]
+	newcolnames=c(names(df), names(bb)[4])
+	df=cbind(df, bb[,4])
+	colnames(df)=newcolnames
+}
+df=df[which(df$chromosome %in% chrkey$SCAFF),]
+
+# Get distance from chromosome end for each window
+pos_pct=NULL
+pos_dist=NULL
+for (i in 1:length(df$chrom)){
+	c=df[i,]$chromosome
+	s=df[i,]$start
+	l=chrkey[which(chrkey$SCAFF==c),]$LENGTH
+	pos_pct[i]=s/l
+	pos_dist[i]=ifelse(pos_pct[i] <= 0.5, pos_pct[i], 1-pos_pct[i])
+}
+df=cbind(df, pos_pct, pos_dist)
+
+# Make final data table
+tt=cbind(df$pos_dist, df$gc_proportion, df$rho, df$het_CYW1141, df$het_CRW1112, df$het_VulGry1, df$het_BGI_N323)
+
+# Plot
+mylabels=c(
+"Distance\nfrom\nchr. end",
+"GC (%)",
+"rho",
+"Het.\nCA condor\n1",
+"Het.\nCA condor\n2",
+"Het.\nAndean\ncondor",
+"Het.\nTurkey\nvulture")
+mycols=colorRampPalette(rev(c("red", "salmon", "white", "royalblue", "navy")))
+
+pdf("correlogram_rho_gc_het.pdf", width=4.2, height=2.8, pointsize=8)
+
+par(xpd=T)
+corrgram(tt, type="data", lower.panel=NULL, upper.panel=panel.shadeNtext, col.regions=mycols, labels=mylabels, cex.labels=1.225)
+
+dev.off()
+
+
+### Function to plot color bar (added in post with image editor)
+# From https://stackoverflow.com/questions/9314658/colorbar-from-custom-colorramppalette
+
+color.bar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nticks), title='') {
+    scale = (length(lut)-1)/(max-min)
+    #dev.new(width=5, height=2)
+    plot(c(min,max), c(0,10), type='n', bty='n', xaxt='n', xlab='', yaxt='n', ylab='', main=title)
+    axis(1, ticks, las=1)
+    for (i in 1:(length(lut)-1)) {
+     x = (i-1)/scale + min
+     rect(x,0,x+1/scale,10, col=lut[i], border=NA)
+    }
+    lines(c(-1,1), c(10,10))
+    lines(c(-1,1), c(0,0))
+	lines(c(-1,-1), c(0,10))
+	lines(c(1,1), c(0,10))
+}
+
+mycols=colorRampPalette(c("red", "salmon", "white", "royalblue", "navy"))
+
+pdf("scale.pdf", width=2, height=.5, pointsize=8)
+par(mar=c(2,1,1,1))
+color.bar(mycols(100), 1)
+dev.off()
+
+
+

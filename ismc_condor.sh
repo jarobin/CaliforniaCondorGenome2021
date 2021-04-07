@@ -88,7 +88,7 @@ done
 
 ### Recombination rate across the genome
 
-# Read in data and rename chromosomes
+# Read in data files and rename chromosomes (from scaffold to proper chromosome names, also exclude chrZ)
 df=read.table("CYW1141_ismc.rho.1Mb.bedgraph_scaffnames_sorted.bed", header=F)
 colnames(df)=c("chromosome","start","end","rho")
 chrkey=read.table("condor_chr_scaff_length.txt", header=T, sep="\t", stringsAsFactors=F)
