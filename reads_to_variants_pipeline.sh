@@ -120,6 +120,7 @@ gatk3 -Xmx${INDEL_IR_RAM} -Djava.io.tmpdir=${TMPDIR} -T IndelRealigner \
 
 
 ### Qualimap (for very large bams, increase memory to prevent job failure)
+# Use to get coverage stats (Table S3)
 
 export QMAP_THREADS=4
 export QMAP_RAM=32G
