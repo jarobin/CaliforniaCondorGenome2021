@@ -1,4 +1,5 @@
 ### MSMC/MSMC2
+# Fig. S4B
 
 ### Generate VCF files and masks for use with MSMC with vcfAllSiteParser.py
 
