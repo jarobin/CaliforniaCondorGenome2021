@@ -1,4 +1,5 @@
 # Generate condor-chicken dotplot with MashMap (https://github.com/marbl/MashMap)
+# Fig. S1B
 
 Q=gc_PacBio_HiC.fasta
 R=galGal6_ordered.fa
