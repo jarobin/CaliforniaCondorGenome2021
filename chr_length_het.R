@@ -1,4 +1,4 @@
-### Plots and stats for het. vs. chr. length and distance from end of chromosome
+### Plots and stats for het. vs. chr. length and distance from end of chromosome (Fig. S3).
 
 library(plyr)
 
