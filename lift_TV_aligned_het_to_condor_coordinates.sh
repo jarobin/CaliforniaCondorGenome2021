@@ -1,4 +1,4 @@
-# Lift over turkey vulture-aligned VCF files to get het. in sliding windows on condor coordinate system
+# Lift over turkey vulture-aligned VCF files to get het. in sliding windows on condor coordinate system (for Fig. S2)
 
 # Workflow 
 # - Turn coordinates of calls and hets from VCF files into bed files
