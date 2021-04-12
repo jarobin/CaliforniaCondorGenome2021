@@ -1,4 +1,4 @@
-### Calculate absolute divergence
+### Calculate absolute divergence (Table S4)
 # See calc_dxy.py below
 
 python ./calc_dxy.py BGI_N323_simple.vcf.gz CRW1112_simple.vcf.gz
