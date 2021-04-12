@@ -1,9 +1,5 @@
-# Condor-chicken Circos plot
-
-cd ~/project/condor/circos_condor
-
-mkdir 20201220
-cd 20201220
+### Condor-chicken Circos plot (Fig. 1)
+# Uses reciprocal best alignments generated with crossSpeciesLiftover.sh.
 
 ### Get .sizes files (tab-delimited: chr length) and reciprocal best net from liftover
 cp ~/project/condor/reference/c*/*/*sizes .
