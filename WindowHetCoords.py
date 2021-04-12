@@ -1,11 +1,17 @@
 # Script to count number of called genotypes and number of heterozygotes per sample in 
 # regions given by a list of coordinates (1-based, inclusive of the start and end positions).
+#
 # Example:
 # HiC_scaffold_1	4652	1004651
 # HiC_scaffold_1	1004652	2004651
 # HiC_scaffold_1	2004652	3004651
 # HiC_scaffold_1	3004652	4004651
 # HiC_scaffold_1	4004652	5004651
+#
+# Used to get heterozygosity in windows with the same coordinates as those from iSMC for 
+# computing correlations shown in Fig. 3F.
+#
+# Executed with Python2.7. Not sure if it works with Python 3+.
 #
 # Input file is a single- or multi-sample VCF file that has been filtered (passing sites 
 # have "PASS" in the FILTER column) and compressed with gzip/bgzip. Sites without PASS in
