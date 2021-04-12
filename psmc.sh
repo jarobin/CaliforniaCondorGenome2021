@@ -1,4 +1,5 @@
 ### PSMC
+# Fig. 4, S4
 
 ### Generate complement masks for making consensus sequence for PSMC
 # Note: Generates the complement of masks created while making input files for MSMC
@@ -183,6 +184,7 @@ done
 
 setwd("~/condor/analysis/psmc")
 
+# Fig. 4
 pdf("psmc_main_5panels_mu1.4e-08_g10.pdf", width=4.488, height=5.25, pointsize=8)
 
 split.screen(rbind(
@@ -367,6 +369,7 @@ dev.off()
 
 
 ### Plots with varying mu, g (in R)
+# Fig. S4A
 
 # Turkey vulture color
 c1=c(0, 192, 0)/255
