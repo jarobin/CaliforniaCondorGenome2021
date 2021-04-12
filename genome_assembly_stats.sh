@@ -1,4 +1,4 @@
-### Genome statistics (given in Table S1)
+### Genome statistics (Table S1)
 # - statswrapper.sh is part of the BBTools suite (http://sourceforge.net/projects/bbmap)
 # - Output: filename, scaf_bp, gap_pct, gc_avg, n_scaffolds, scaf_max, scaf_L50, scaf_L90, scaf_N50, scaf_N90, n_contigs, ctg_max, ctg_L50, ctg_L90, ctg_N50, ctg_N90
 
@@ -7,7 +7,7 @@ cat genome_stats.txt_temp | tr "_N_L" "_L_N" | sed 's/\/home\/jacqueline\/projec
 rm genome_stats.txt_temp
 
 
-### Plot cumulative genome proportion by number of scaffolds in R
+### Plot cumulative genome proportion by number of scaffolds in R (Fig. S1A)
 # Commands for getting input files:
 # for i in *.fa* ; do faToTwoBit ${i} ${i%.fa*}.2bit ; done
 # for i in *.2bit ; do twoBitInfo ${i} ${i%.2bit}.sizes ; done
