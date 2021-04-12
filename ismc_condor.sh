@@ -1,4 +1,4 @@
-### iSMC recombination rate analysis 
+### iSMC recombination rate analysis (Fig. 3)
 
 ### Use filtered VCF file (sites failing filters excluded, missing genotypes excluded, only scaffolds 1-4, 6-32 included)
 VCF=CYW1141_simple_PASS_nomissing_scaffold1-32_autos.vcf.gz
@@ -86,7 +86,7 @@ done
 ################################################################################
 ### Plot in R
 
-### Recombination rate across the genome
+### Recombination rate across the genome (Fig. 3A)
 
 # Read in data files and rename chromosomes (from scaffold to proper chromosome names, also exclude chrZ)
 df=read.table("CYW1141_ismc.rho.1Mb.bedgraph_scaffnames_sorted.bed", header=F)
@@ -147,7 +147,7 @@ box()
 
 
 ################################################################################
-### Boxplot of recombination rate in distal versus proximal regions
+### Boxplot of recombination rate in distal versus proximal regions (Fig. 3B)
 # Note: Uses same input data as above (recombination rate across the genome)
 
 # Significance symbols to add to plot
