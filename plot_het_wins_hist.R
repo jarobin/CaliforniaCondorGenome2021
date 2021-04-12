@@ -1,4 +1,5 @@
 ### Plot het. in sliding windows across the genome, plus histograms of window-based het.
+# Fig. 2, S2
 # Input data: output of SlidingWindowHet.py with 1 Mb win size and 1 Mb step (non-overlapping windows)
 
 library(plyr)
@@ -22,7 +23,7 @@ c(0.75, 1.0, 0.25, 0.5),
 c(0.0, 0.75, 0.0, 0.25),
 c(0.75, 1.0, 0.0, 0.25)))
 
-
+# Fig. 2A-D
 plotwinhet=function(samplename, labelx, panellabel){
 	# Calculate mean het. and generate plot title
 	meanhet=sum(allhet[,5], na.rm=T)/sum(allhet[,4], na.rm=T)
@@ -57,7 +58,7 @@ plotwinhet=function(samplename, labelx, panellabel){
 	axis(side=1, at=b[numpos], tick=F, labels=mylabels, las=3, line=-.25, cex.axis=1)
 }
 
-
+# Fig. 2E-H
 plotwinhethist=function(samplename, labelx, panellabel){
 	par(mar=c(3,3.75,2,0.5))
 	par(xpd=T)
