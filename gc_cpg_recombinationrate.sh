@@ -1,4 +1,4 @@
-# GC content + CpG island identification and recombination rate analysis
+# GC content + CpG island identification and recombination rate analysis (Fig. 3C-F)
 
 ### Get GC content in non-overlapping 1 Mb windows
 # Note: same coordinates as iSMC 1 Mb windows
@@ -67,7 +67,7 @@ done ; done
 ################################################################################
 ### Plotting in R
 
-### Plot GC content across the genome
+### Plot GC content across the genome (Fig. 3C)
 
 # Read in data files and rename chromosomes (from scaffold to proper chromosome names, also exclude chrZ)
 df=read.table("gc_PacBio_HiC_CYW1141_ismc.rho.1Mb_GC.txt", header=T)
@@ -127,7 +127,7 @@ box()
 
 
 ################################################################################
-### Boxplot of GC content in distal versus proximal regions
+### Boxplot of GC content in distal versus proximal regions (Fig. 3D)
 # Note: Uses same input data as above (GC content across the genome)
 
 # Significance symbols to add to plot
@@ -180,7 +180,7 @@ text(1.5, ymax-(.025*yrange), starfn(wt$p.value))
 
 
 ################################################################################
-### Recombination rate by distance from CpG islands plus bootstrap
+### Recombination rate by distance from CpG islands plus bootstrap (Fig. 3E)
 
 # Read in rho data annotated with distance to nearest CGI
 # Columns: chromosome, window start, window end, mean rho/bp, distance to nearest CGI
@@ -270,7 +270,8 @@ lines(1:length(mean_rho_per_dist_bin), scale*mean_rho_per_dist_bin, lwd=2)
 
 
 ################################################################################
-### Correlogram (adapted from https://stackoverflow.com/questions/19012529/correlation-corrplot-configuration)
+### Correlogram (Fig. 3F)
+# Adapted from https://stackoverflow.com/questions/19012529/correlation-corrplot-configuration
 
 library(corrgram)
 
