@@ -1,5 +1,8 @@
 # Script to count number of called genotypes and number of heterozygotes per sample in 
-# sliding windows.
+# sliding windows, as shown in Fig. 2, S2.
+#
+# Executed with Python2.7. Not sure if it works with Python 3+.
+#
 # Input file is a single- or multi-sample VCF file that has been filtered (passing sites 
 # have "PASS" in the FILTER column) and compressed with gzip/bgzip. Sites without PASS in
 # filter column are skipped.
